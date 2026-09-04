@@ -1,0 +1,96 @@
+name: Sentinella cron (repo pubblico)
+
+# PERCHE' ESISTE — WQ-294, criterio 1 riscritto (PM 31/08/2026 18:5x).
+# Domanda unica: il ritardo del cron del Pubblicatore (mediana 414 min dal 27/08,
+# contro 49 min fino al 26/08 — F-0355/F-0358) dipende dal fatto che
+# `accumunation-media` e' diventato PRIVATO il 26/08 (F-0176), oppure e' l'account?
+# Il confronto "pagina Actions, repo pubblico contro privati" NON era eseguibile:
+# `accumunation-social` — l'unico repo pubblico — aveva ZERO workflow, quindi non
+# c'era niente da confrontare. Questo file crea il dato che mancava.
+#
+# COS'E': un esperimento controllato che non fa NIENTE se non annotare quando si sveglia.
+# Stesso account, stessi identici cron di `.github/workflows/pubblica.yml` in
+# `accumunation-media`, stesso runner. UNICA VARIABILE: questo repo e' PUBBLICO.
+#
+# COME SI LEGGE (dopo 2-3 giorni, ~10 righe in `sentinella/cron-ritardo.md`):
+#   - sentinella PUNTUALE + pubblicatore in ritardo  -> la causa e' F-0176 (scelta nostra),
+#     e la strada (i) di WQ-294 criterio 3 e' quella giusta.
+#   - ritardano ENTRAMBE                             -> la causa e' l'account,
+#     F-0176 e' scagionata, non si tocca la visibilita' di niente.
+#   Si scrive quale delle due, non la piu' comoda.
+#
+# ⛔ NON FA ALTRO. Non pubblica, non legge la coda, non tocca la posta, non usa segreti.
+# Quando WQ-294 e' chiusa questo workflow si cancella: e' uno strumento di misura, non un servizio.
+
+on:
+  schedule:
+    # ⛔ COPIA ESATTA dei cron di `pubblica.yml` (accumunation-media) al 04/09/2026.
+    # Se quelli cambiano e questi no, il confronto non vale piu': si allineano o si spegne.
+    - cron: '36 6 * * *'    # 08:36 Roma - la storia del mattino
+    - cron: '55 6 * * *'    #   scorta
+    - cron: '6 11 * * *'    # 13:06 Roma - fascia PRANZO
+    - cron: '25 11 * * *'   #   scorta
+    - cron: '36 16 * * *'   # 18:36 Roma - fascia PRE-CENA
+    - cron: '55 16 * * *'   #   scorta
+    - cron: '6 18 * * *'    # 20:06 Roma - fascia CENA
+    - cron: '25 18 * * *'   #   scorta
+    - cron: '36 19 * * *'   # 21:36 Roma - fascia DOPOCENA
+    - cron: '55 19 * * *'   #   scorta
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sentinella-cron
+  cancel-in-progress: false
+
+jobs:
+  annota:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Annota sveglia e ritardo
+        run: |
+          set -euo pipefail
+          CRON="${{ github.event.schedule }}"
+          if [ -z "$CRON" ]; then CRON="manuale"; fi
+          ORA_RUN=$(date -u +'%Y-%m-%d %H:%M')
+          if [ "$CRON" = "manuale" ]; then
+            RITARDO="n/d"
+            PREVISTO="n/d"
+          else
+            MIN=$(echo "$CRON" | cut -d' ' -f1)
+            H=$(echo "$CRON" | cut -d' ' -f2)
+            PREVISTO=$(date -u +'%Y-%m-%d')" $(printf '%02d:%02d' "$H" "$MIN")"
+            RITARDO=$(( ( $(date -u +%s) - $(date -u -d "$PREVISTO" +%s) ) / 60 ))
+            # sveglia arrivata dopo la mezzanotte UTC: il previsto e' di ieri, non di oggi
+            if [ "$RITARDO" -lt -60 ]; then RITARDO=$(( RITARDO + 1440 )); fi
+          fi
+          mkdir -p sentinella
+          if [ ! -f sentinella/cron-ritardo.md ]; then
+            {
+              echo "# Sentinella cron — repo PUBBLICO \`accumunation-social\`"
+              echo
+              echo "WQ-294 criterio 1. Stessi cron di \`pubblica.yml\` (repo PRIVATO \`accumunation-media\`),"
+              echo "stesso account, stesso runner: unica variabile la visibilita' del repo."
+              echo "Ritardo = ora vera del run meno ora del cron, in minuti, UTC."
+              echo
+              echo "| previsto UTC | run UTC | ritardo min | cron |"
+              echo "|---|---|---|---|"
+            } > sentinella/cron-ritardo.md
+          fi
+          echo "| $PREVISTO | $ORA_RUN | $RITARDO | \`$CRON\` |" >> sentinella/cron-ritardo.md
+          tail -3 sentinella/cron-ritardo.md
+
+      - name: Commit
+        run: |
+          set -euo pipefail
+          git config user.name  "sentinella-cron"
+          git config user.email "actions@github.com"
+          git add sentinella/cron-ritardo.md
+          git diff --cached --quiet && exit 0
+          git commit -m "sentinella: sveglia $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git push
