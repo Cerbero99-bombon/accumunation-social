@@ -7,3 +7,4 @@ Ritardo = ora vera del run meno ora del cron, in minuti, UTC.
 | previsto UTC | run UTC | ritardo min | cron |
 |---|---|---|---|
 | n/d | 2026-09-04 14:11 | n/d | `manuale` |
+| 2026-09-04 16:36 | 2026-09-04 19:06 | 150 | `36 16 * * *` |
