@@ -1,15 +1,22 @@
-# Scene dei ganci «Giorno N»
+# scene-intro: parco intro dei reel «Giorno N»
 
-Le sette scene fal (N1..N7, una per macronicchia) da cui il pubblicatore rifa' il gancio di 5 secondi
-col contatore dei follower letto al momento della pubblicazione (`tools/contatore_giorno.py` nel repo
-privato `accumunation-media`). Ogni voce GIORNO-N in `queue.json` dice quale usare nel campo
-`gancio_scena` (es. `N1-veo31lite`). Se una scena non sta qui, quel giorno il contatore non si ristampa.
+Dal 01/10/2026 qui ci sono SOLO le 10 scene nuove (riprese in prima persona, camminata a mano, 8 secondi, 720p ricampionato a 1080x1920, 30 fps, senza audio).
+Le intro vecchie (N1..N7, 23B, 23C) sono in `../archivio-scene-intro/`: non usarle.
 
-CASA N1-lavanderia · OFFICINA N7-banco · PERSONA N2-lavandino · DIGITALE N4-corridoio-server ·
-MOVIMENTO N5-tornelli · ANIMALI N3-ciotola · CONSEGNE N6-nastro. Salvate qui il 14/09/2026.
+Fase follower attuale: sotto 400. Una persona avanti con l'oggetto, gli altri lontani, girati e distratti.
+Soglie: 400 follower = 2 persone avanti, 600 = 3, 800 = 4, 1000 = 5, poi +5 ogni 3000. A ogni soglia si generano intro nuove (tools/scena.py, piano/scene.json nel repo privato media).
 
-22/09/2026 (Enrico): aggiunte le cinque scene delle magliette (23B-veo31lite, 23B-wan25, 23B-kling25:
-magliette buttate nella busta o per terra; 23C-veo31lite, 23C-kling25: magliette sul banco). La 24A
-(bilancia) resta fuori, bocciata. Il pubblicatore sceglie da solo la scena usata piu' tempo fa fra
-TUTTE quelle presenti qui: una scena nuova messa in questa cartella entra in rotazione senza altro.
-La copertina si rifa' sempre dalla STESSA scena del gancio, cosi' copertina e video coincidono.
+| File | Oggetto | Ambiente | Durata |
+|---|---|---|---|
+| P1-corsia-video | rotolo di carta igienica | corsia di supermercato | 6s |
+| P2-viale-video | buste bianche della spesa | viale alberato al tramonto | 6s |
+| P3-notte-video | rotolo di carta igienica | strada di notte, vetrina accesa | 8s |
+| P4-controller-video | scatola controller da gioco | galleria di un centro commerciale | 8s |
+| P5-valigetta-video | cassetta attrezzi rossa | strada residenziale, mattina | 8s |
+| P6-sacco-video | sacco a pelo arancione | banchina del treno all'alba | 8s |
+| P7-maschere-video | scatola di maschere viso rosa | portici del centro storico | 8s |
+| P8-ombretti-video | palette di ombretti nera | lungomare, mattina | 8s |
+| P9-candela-video | candela profumata in vaso | vicoli di pietra, sera | 8s |
+| P10-mattoncini-video | scatola di mattoncini giocattolo | sentiero nel parco, mattina | 8s |
+
+La rotazione e' per famiglia (prefisso prima del primo trattino): ogni P1..P10 e' una famiglia a se', esce quella usata piu' tempo fa.
